@@ -21,9 +21,10 @@ class VideoController extends Controller
      public function index(Request $request)
      {
          if($request->ajax()){
-             $query=Video::orderby('id' , 'desc')->where('id' ,'>' , 0);
+             $query=Video::orderby('id' , 'asc')->where('id' ,'>' , 0);
              if($request['search'] != ""){
-                 $query->where('title', 'like', '%'. $request['search'] .'%');
+                 $query->where('title', 'like', '%'. $request['search'] .'%')
+                       ->orWhere('heading', 'like', '%'. $request['search'] .'%');
              }
              if($request['status'] != "All"){
                  if($request['status']==2){
@@ -37,7 +38,7 @@ class VideoController extends Controller
  
          // Handle status filtering from dashboard
          $status_filter = $request->get('status');
-         $query = Video::orderby('id', 'desc')->where('id', '>', 0);
+         $query = Video::orderby('id', 'asc')->where('id', '>', 0);
 
          $totalVideos = Video::count();
          $activeVideos = Video::where('status', 1)->count();
@@ -45,10 +46,10 @@ class VideoController extends Controller
          
          if ($status_filter === 'active') {
              $query->where('status', 1);
-             $page_title = 'Active Videos';
-         } elseif ($status_filter === 'inactive') {
-             $query->where('status', 0);
-             $page_title = 'Inactive Videos';
+            $page_title = 'Published Videos';
+        } elseif ($status_filter === 'inactive') {
+            $query->where('status', 0);
+            $page_title = 'Draft Videos';
          } else {
              $page_title = 'All Videos';
          }
@@ -73,12 +74,15 @@ class VideoController extends Controller
     {
             $validator = $request->validate([
             'title' => 'required |max:100 ',
+            'heading' => 'required |max:100 ',
             'video_url' => 'required |max:255',
         ]);
 
         $model = new Video();
+        $model->heading = $request->heading;
         $model->title = $request->title;
         $model->video_url = $request->video_url;
+        $model->featured = in_array((string) $request->input('featured'), ['0', '1'], true) ? $request->input('featured') : '0';
         $model->save();
 
         return redirect()->route('video.index')->with('message', 'Video Added Successfully !');
@@ -109,13 +113,16 @@ class VideoController extends Controller
     {
         $validator = $request->validate([
             'title' => 'required |max:100 ',
+            'heading' => 'required |max:100 ',
             'video_url' => 'required |max:255',
         ]);
 
         $model = Video::where('id', $id)->first();
+        $model->heading = $request->heading;
         $model->title = $request->title;
         $model->video_url = $request->video_url;
-        $model->status = $request->status;
+        $model->featured = in_array((string) $request->input('featured'), ['0', '1'], true) ? $request->input('featured') : '0';
+        $model->status = in_array((string) $request->input('status'), ['0', '1'], true) ? $request->input('status') : '0';
         $model->save();
 
         return redirect()->route('video.index')->with('message', 'Video Updated Successfully !');

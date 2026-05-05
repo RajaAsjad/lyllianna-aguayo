@@ -56,7 +56,7 @@
         <div class="hero__visual">
           <div class="hero__img-frame">
             <div class="hero__img-glow"></div>
-            <img src="https://imagedelivery.net/R3XOqFcTepHxP5M00fjeUw/8a887572-ecce-405e-e7e7-68de50b94c00/img256" alt="Volleyball player in action" width="800" height="900" loading="eager" class="hero__img">
+            <img src="{{ asset('assets/website/images/hero-img.jpg') }}" alt="Volleyball player in action" width="800" height="900" loading="eager" class="hero__img">
             <div class="hero__img-overlay"></div>
           </div>
           <div class="hero__float-card hero__float-card--digs">
