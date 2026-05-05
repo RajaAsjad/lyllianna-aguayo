@@ -134,6 +134,20 @@
 		padding: 16px 16px 18px 16px;
 		background: linear-gradient(125deg, #1e1b4b 0%, #4c1d95 32%, #a21caf 62%, #c2410c 100%);
 		isolation: isolate;
+		overflow: hidden;
+	}
+	.video-item-card__hero--has-thumb {
+		background: #1e1b4b;
+		min-height: 140px;
+	}
+	.video-item-card__hero-thumb {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		z-index: 0;
+		pointer-events: none;
 	}
 	.video-item-card__hero:has(.video-item-card__fab) {
 		padding-right: 56px;
@@ -143,12 +157,12 @@
 		position: absolute;
 		inset: 0;
 		background: linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.55) 100%);
-		z-index: 0;
+		z-index: 1;
 		pointer-events: none;
 	}
 	.video-item-card__hero-inner {
 		position: relative;
-		z-index: 1;
+		z-index: 2;
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
@@ -178,7 +192,7 @@
 		position: absolute;
 		top: 12px;
 		right: 12px;
-		z-index: 2;
+		z-index: 3;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -384,44 +398,7 @@
 				<div class="video-cards-wrap">
 					<div class="video-cards-grid" id="body">
 						@foreach($models as $key=>$model)
-						<article class="video-item-card" id="id-{{ $model->id }}">
-							<div class="video-item-card__hero">
-								<div class="video-item-card__hero-inner">
-									<span class="video-item-card__sl">#{{ $models->firstItem() + $key }}</span>
-									<h3 class="video-item-card__heading">{{ $model->heading }}</h3>
-								</div>
-								@canany(['video-edit', 'video-delete'])
-								<div class="video-item-card__fab">
-									@can('video-edit')
-									<a href="{{ route('video.edit', $model->id) }}" data-toggle="tooltip" data-placement="left" title="Edit" class="video-item-card__fab-btn" aria-label="Edit video"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-									@endcan
-									@can('video-delete')
-									<button type="button" class="video-item-card__fab-btn video-item-card__fab-btn--danger delete" data-slug="{{ $model->id }}" data-del-url="{{ url('video', $model->id) }}" title="Delete" aria-label="Delete video"><i class="fa fa-trash" aria-hidden="true"></i></button>
-									@endcan
-								</div>
-								@endcanany
-							</div>
-							<div class="video-item-card__body">
-								<p class="video-item-card__title">{{ $model->title }}</p>
-								<a href="{{ $model->video_url }}" target="_blank" rel="noopener noreferrer" class="video-item-card__url">{{ $model->video_url }}</a>
-								<div class="video-item-card__badges">
-									<div class="video-item-card__badges-left">
-										@if($model->featured == 1 || $model->featured === '1')
-										<span class="video-badge-featured">Featured</span>
-										@else
-										<span class="video-badge-not-featured">Not featured</span>
-										@endif
-									</div>
-									<div class="video-item-card__badges-right">
-										@if($model->status == 1 || $model->status === '1')
-										<span class="video-badge-active">Publish</span>
-										@else
-										<span class="video-badge-inactive">Draft</span>
-										@endif
-									</div>
-								</div>
-							</div>
-						</article>
+						@include('admin.videos.partials.video-card', ['model' => $model, 'key' => $key, 'models' => $models])
 						@endforeach
 						@if($models->hasPages())
 						<div class="video-cards-pagination">

@@ -1,9 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\admin;
-use App\Models\Video;
+
 use App\Http\Controllers\Controller;
+use App\Models\Video;
+use App\Services\VideoThumbnailResolver;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class VideoController extends Controller
 {
@@ -82,6 +85,7 @@ class VideoController extends Controller
         $model->heading = $request->heading;
         $model->title = $request->title;
         $model->video_url = $request->video_url;
+        $model->thumbnail_url = app(VideoThumbnailResolver::class)->resolve($request->video_url);
         $model->featured = in_array((string) $request->input('featured'), ['0', '1'], true) ? $request->input('featured') : '0';
         $model->save();
 
@@ -118,12 +122,17 @@ class VideoController extends Controller
         ]);
 
         $model = Video::where('id', $id)->first();
+        $previousUrl = (string) $model->video_url;
         $model->heading = $request->heading;
         $model->title = $request->title;
         $model->video_url = $request->video_url;
+        $model->thumbnail_url = app(VideoThumbnailResolver::class)->resolve($request->video_url);
         $model->featured = in_array((string) $request->input('featured'), ['0', '1'], true) ? $request->input('featured') : '0';
         $model->status = in_array((string) $request->input('status'), ['0', '1'], true) ? $request->input('status') : '0';
         $model->save();
+
+        Cache::forget('video_thumb_display_'.md5($previousUrl));
+        Cache::forget('video_thumb_display_'.md5((string) $request->video_url));
 
         return redirect()->route('video.index')->with('message', 'Video Updated Successfully !');
     }
